@@ -6,12 +6,30 @@
 
 @import "normalize.less";
 
+.rounded-corners (@radius: 5px) {
+	border-radius: @radius;
+	-webkit-border-radius: @radius;
+	-moz-border-radius: @radius;
+}
+
 .biggerthanoptimus {
 	#fork {
 		position: absolute;
 		top: 0;
 		right: 0;
 		border: 0;
+	}
+	
+	#spinner {
+		height: 20px;
+		width: 20px;
+		background-color: black;
+		float: left;
+		margin: 0 20px 0 5px;
+		.rounded-corners(10px);
+	}
+	
+	#result-box {
 	}
 }
 
