@@ -66,6 +66,9 @@
 		box.append($('<h3>clocks in at ' + winner.wordcount + ' words, beating out</h3>'));
 		box.append($('<h2><a href="' + loser.url + '" target="_blank">' + loser.title + '</a></h2>'));
 		box.append($('<h3>with only ' + loser.wordcount + ' words.</h3>'));
+		box.append($('<span class="st_facebook_hcount" displayText="Facebook"></span>'));
+		box.append($('<span class="st_twitter_hcount" displayText="Tweet"></span>'));
+		box.append($('<span class="st_plusone_hcount" displayText="Google +1"></span>'));
 	}
 	
 	var colors = ["#e8161b", "#e5191f", "#e21c23", "#de1f26", "#db222a", "#d8252e",
