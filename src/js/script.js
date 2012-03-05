@@ -23,8 +23,17 @@
 		if(excerpt.indexOf('REDIRECT') == 0){
 			redirect = stripped.substring(9, excerpt.indexOf('\n'));
 		}
+		
+		var url = null;
+		for(index in data.parse.sections){
+			var section = data.parse.sections[index];
+			url = 'http://en.wikipedia.org/wiki/' + section.fromtitle
+			break;
+		}
+		
 		return {
 			title: data.parse.title,
+			url: url,
 			wordcount: wordcount,
 			excerpt: excerpt,
 			redirect: redirect,
@@ -53,9 +62,9 @@
 	function displayWinner(winner, loser){
 		var box = $('#result-box');
 		box.append($('<h3>In a Wikipedia matchup</h3>'));
-		box.append($('<h1>' + winner.title + '</h1>'));
+		box.append($('<h1><a href="' + winner.url + '" target="_blank">' + winner.title + '</a></h1>'));
 		box.append($('<h3>clocks in at ' + winner.wordcount + ' words, beating out</h3>'));
-		box.append($('<h2>' + loser.title + '</h2>'));
+		box.append($('<h2><a href="' + loser.url + '" target="_blank">' + loser.title + '</a></h2>'));
 		box.append($('<h3>with only ' + loser.wordcount + ' words.</h3>'));
 	}
 	
