@@ -52,7 +52,6 @@
 	
 	function displayWinner(winner, loser){
 		var box = $('#result-box');
-		box.empty();
 		box.append($('<h3>In a Wikipedia matchup</h3>'));
 		box.append($('<h1>' + winner.title + '</h1>'));
 		box.append($('<h3>clocks in at ' + winner.wordcount + ' words, beating out</h3>'));
@@ -60,21 +59,52 @@
 		box.append($('<h3>with only ' + loser.wordcount + ' words.</h3>'));
 	}
 	
-	function startSpinner(spinner){
-		
+	var colors = ["#e8161b", "#e5191f", "#e21c23", "#de1f26", "#db222a", "#d8252e",
+		"#d52832", "#d22b36", "#cf2e3a", "#cb303d", "#c83341", "#c53645", "#c23949",
+		"#bf3c4d", "#bb3f50", "#b84254", "#b54558", "#b2485c", "#af4b60", "#ac4e64",
+		"#a85167", "#a5546b", "#a2576f", "#9f5a73", "#9c5d77", "#985f7a", "#95627e",
+		"#926582", "#8f6886", "#8c6b8a", "#886e8d", "#857191", "#827495", "#7f7799",
+		"#7c7a9d", "#797da1", "#7580a4", "#7283a8", "#6f86ac", "#6c89b0", "#698cb4",
+		"#658eb7", "#6291bb", "#5f94bf", "#5c97c3", "#599ac7", "#569dcb", "#52a0ce",
+		"#4fa3d2", "#4ca6d6"
+	];
+	function startSpinner(spinner, color){
+		if((! color) || color > colors.length - 1){
+			color = 0;
+		}
+		$(spinner).html('searching');
+		$(spinner).animate({backgroundColor: colors[color]}, {
+			duration: 0.1,
+			complete: function(){
+				if($(spinner).html() != 'do it!'){
+					startSpinner(spinner, color + 1);
+				}
+				else{
+					$(spinner).css('backgroundColor', '#000');
+				}
+			}
+		})
 	}
 	
 	function stopSpinner(spinner){
-		
+		$(spinner).html('do it!');
 	}
 	
 	$(document).ready(function(){
-		$('form').submit(function(){
+		$('#spinner').click(function(){
+			if($(this).html() != 'do it!')
+				return;
+			
 			var champion = $('#champion').val();
 			var challenger = $('#challenger').val();
 			
+			var box = $('#result-box');
+			box.empty();
+			startSpinner($('#spinner'));
+			
 			getArticle(champion, function(champion){
 				getArticle(challenger, function(challenger){
+					stopSpinner($('#spinner'));
 					if(champion.wordcount > challenger.wordcount){
 						displayWinner(champion, challenger);
 					}
