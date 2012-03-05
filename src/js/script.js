@@ -102,34 +102,41 @@
 		$(spinner).html('do it!');
 	}
 	
-	$(document).ready(function(){
-		$('#spinner').click(function(){
-			if($(this).html() != 'do it!')
-				return;
+	function lookupArticles(){
+		if($('#spinner').html() != 'do it!')
+			return;
 			
-			var champion = $('#champion').val();
-			var challenger = $('#challenger').val();
+		var champion = $('#champion').val();
+		var challenger = $('#challenger').val();
 			
-			var box = $('#result-box');
-			box.empty();
-			startSpinner($('#spinner'));
+		var box = $('#result-box');
+		box.empty();
+		startSpinner($('#spinner'));
 			
-			getArticle(champion, function(champion){
-				getArticle(challenger, function(challenger){
-					stopSpinner($('#spinner'));
-					if(champion.wordcount > challenger.wordcount){
-						displayWinner(champion, challenger);
-					}
-					else if(champion.wordcount < challenger.wordcount){
-						displayWinner(challenger, champion);
-					}
-					else{
-						alert('unbelievable: a tie.');
-					}
-				});
+		getArticle(champion, function(champion){
+			getArticle(challenger, function(challenger){
+				stopSpinner($('#spinner'));
+				if(champion.wordcount > challenger.wordcount){
+					displayWinner(champion, challenger);
+				}
+				else if(champion.wordcount < challenger.wordcount){
+					displayWinner(challenger, champion);
+				}
+				else{
+					alert('unbelievable: a tie.');
+				}
 			});
-			
-			return false;
 		});
+			
+		return false;
+	}
+	
+	$(document).ready(function(){
+		$('input').keydown(function(event){
+			if(event.which == 13 || event.which == 25){
+				lookupArticles();
+			}
+		});
+		$('#spinner').click(lookupArticles);
 	});
 })(jQuery);
