@@ -7,40 +7,60 @@
 	var API_URL = 'https://en.wikipedia.org/w/api.php';
 	
 	function parseArticle(data){
-		var articleText = data.parse.text['*'];
+		var title = '';
+		var articleText = null;
+		var html = '';
 		var wordcount = 0;
-		
-		var html = $(articleText);
-		html.filter('p').each(function(){
-			var code = $(this).html();
-			var words = code.replace(/(<([^>]+)>)/ig,"").split(' ');
-			wordcount = wordcount + words.length;
-		});
-		
-		var stripped = $.trim(articleText.replace(/(<([^>]+)>)/ig,""));
-		var excerpt = stripped.substring(0, 100);
 		var redirect = null;
-		if(excerpt.indexOf('REDIRECT') == 0){
-			redirect = stripped.substring(9, excerpt.indexOf('\n'));
+		var excerpt = '';
+		var error = '';
+		if(data.error){
+			error = data.error.code;
 		}
 		
-		var url = null;
-		for(index in data.parse.sections){
-			var section = data.parse.sections[index];
-			url = 'http://en.wikipedia.org/wiki/' + section.fromtitle
-			break;
+		if(data.parse){
+			title = data.parse.title;
+			articleText = data.parse.text['*'];
+			html = $(articleText);
+			html.filter('p').each(function(){
+				var code = $(this).html();
+				var words = code.replace(/(<([^>]+)>)/ig,"").split(' ');
+				wordcount = wordcount + words.length;
+			});
+		
+			var stripped = $.trim(articleText.replace(/(<([^>]+)>)/ig,""));
+			excerpt = stripped.substring(0, 100);
+			redirect = null;
+			if(excerpt.indexOf('REDIRECT') == 0){
+				redirect = stripped.substring(9, excerpt.indexOf('\n'));
+			}
+		
+			var url = null;
+			for(index in data.parse.sections){
+				var section = data.parse.sections[index];
+				url = 'http://en.wikipedia.org/wiki/' + section.fromtitle
+				break;
+			}
+			
+			for(var index in data.parse.categories){
+				var category = data.parse.categories[index];
+				if(category['*'] == 'Disambiguation_pages'){
+					error = 'disambiguation';
+				}
+			}
 		}
 		
 		return {
-			title: data.parse.title,
+			title: title,
 			url: url,
+			error: error,
 			wordcount: wordcount,
 			excerpt: excerpt,
 			redirect: redirect,
 		};
 	}
 	
-	function getArticle(query, callback){
+	function getArticle(query, callback, errback){
 		var url = API_URL + '?action=parse&page=' + encodeURIComponent(query) + '&format=json';
 		$.ajax(url, {
 			dataType: 'jsonp',
@@ -48,6 +68,10 @@
 				var article = parseArticle(data);
 				if(article.redirect){
 					getArticle(article.redirect, callback);
+				}
+				else if(article.error){
+					errback(article.error, article);
+					return;
 				}
 				else{
 					callback(article);
@@ -102,10 +126,30 @@
 		$(spinner).html('do it!');
 	}
 	
+	function championError(type, article){
+		stopSpinner($('#spinner'));
+		if(type == 'disambiguation'){
+			$('.champion.error').html('<a href="' + article.url + '" target="_blank">ambiguous topic</a>');
+		}
+		else if(type == 'missingtitle'){
+			$('.champion.error').html('no such topic');
+		}
+	}
+	
+	function challengerError(type, article){
+		stopSpinner($('#spinner'));
+		if(type == 'disambiguation'){
+			$('.challenger.error').html('<a href="' + article.url + '" target="_blank">ambiguous topic</a>');
+		}
+		else if(type == 'missingtitle'){
+			$('.challenger.error').html('no such topic');
+		}
+	}
+	
 	function lookupArticles(){
 		if($('#spinner').html() != 'do it!')
 			return;
-			
+		$('.error').html('');
 		var champion = $('#champion').val();
 		var challenger = $('#challenger').val();
 			
@@ -125,8 +169,8 @@
 				else{
 					alert('unbelievable: a tie.');
 				}
-			});
-		});
+			}, challengerError);
+		}, championError);
 			
 		return false;
 	}
